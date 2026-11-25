@@ -59,7 +59,7 @@ Languages: **English, Hindi, Punjabi**. Every output carries a disclaimer:
 
 - [x] **Step 0** — Scaffold + conda env + repo
 - [x] **Step 1** — Extraction / cleaning / segmentation / doc-type
-- [ ] **Step 2** — Corpus manifest + annotation tool
+- [x] **Step 2** — Corpus manifest + annotation tool
 - [ ] **Step 3** — Classical baselines (TF-IDF+LR, TextRank, BM25)
 - [ ] **Step 4** — BiLSTM + XLM-R tagging (grouped CV)
 - [ ] **Step 5** — Gemini layer (field extraction + summaries)
@@ -69,9 +69,51 @@ Languages: **English, Hindi, Punjabi**. Every output carries a disclaimer:
 - [ ] **Step 9** — Evaluation scripts
 - [ ] **Step 10** — Docs + demo
 
+### Data Collection Checklist
+
+| `doc_id` | `doc_type` | Status |
+|----------|------------|--------|
+| `rent_01` | `rental_agreement` | `[ ]` not-yet-collected |
+| `rent_02` | `rental_agreement` | `[ ]` not-yet-collected |
+| `rent_03` | `rental_agreement` | `[ ]` not-yet-collected |
+| `rent_04` | `rental_agreement` | `[ ]` not-yet-collected |
+| `tos_01` | `terms_of_service` | `[ ]` not-yet-collected |
+| `tos_02` | `terms_of_service` | `[ ]` not-yet-collected |
+| `tos_03` | `terms_of_service` | `[ ]` not-yet-collected |
+| `tos_04` | `terms_of_service` | `[ ]` not-yet-collected |
+| `gov_01` | `government_notice` | `[ ]` not-yet-collected |
+| `gov_02` | `government_notice` | `[ ]` not-yet-collected |
+| `gov_03` | `government_notice` | `[ ]` not-yet-collected |
+| `gov_04` | `government_notice` | `[ ]` not-yet-collected |
+
 ---
 
 ## 4 · LOG
+
+### 2026-11-25 — Step 2: Corpus manifest & annotation tooling
+
+**What was built:**
+- `data/manifest.csv` with columns `doc_id,doc_type,title,source_url,license_or_terms_note,language,pages,notes` and `data/README.md` documenting the 12-document target (`rent_01..rent_04`, `tos_01..tos_04`, `gov_01..gov_04`), public-sources/no-PII policy, and gitignore policy.
+- `docs/annotation_guidelines.md` defining multi-label clause tags (`obligation`, `right`, `deadline`, `penalty` with 2 examples each), 150–250 word grade-8 reference summaries, and 5 answerable + 2 unanswerable QA pairs per document.
+- `scripts/prepare_annotation.py` running `extract -> clean -> segment` across `data/raw/` into `data/gold/<doc_id>.clauses.json`, `<doc_id>.qa.json`, and `<doc_id>.summary.txt` while preserving any files that already contain annotations.
+- `tools/annotate.html` self-contained offline HTML/JS clause tagger (file picker, 1–4 tag shortcuts, Left/Right navigation, `S` JSON download, progress counter, jump to next unannotated clause).
+- `scripts/corpus_stats.py` reporting per-doc and total clause/tag counts and flagging documents with zero annotated clauses.
+- `tests/test_annotation_tooling.py` testing `prepare_annotation`, annotation preservation, `corpus_stats`, manifest/guidelines, and offline HTML annotator.
+
+**How to run:**
+```powershell
+& "C:\ProgramData\miniconda3\condabin\conda.bat" run -n NLP_Project --no-capture-output python -m scripts.prepare_annotation
+& "C:\ProgramData\miniconda3\condabin\conda.bat" run -n NLP_Project --no-capture-output python -m scripts.corpus_stats
+& "C:\ProgramData\miniconda3\condabin\conda.bat" run -n NLP_Project --no-capture-output pytest "tests" -v
+```
+
+**Known limitations:**
+- `data/raw/` and `data/gold/` contain no collected documents yet (`0 / 12` collected — see Data Collection Checklist above).
+- `tools/annotate.html` exports updated `<doc_id>.clauses.json` via browser download (save/replace back into `data/gold/`).
+- No automated summary readability/length validator or QA ID validator yet (can be added alongside evaluation in Step 9 or pre-training checks).
+
+**Next step:**
+- Collect the 12 public documents into `data/raw/`, log them in `data/manifest.csv`, annotate via `tools/annotate.html`, and proceed to Step 3 (classical baselines).
 
 ### 2026-11-25 — Step 1: Extraction, cleaning, segmentation, doc-type (M1 & M2)
 

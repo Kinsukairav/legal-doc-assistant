@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LegalAssist — Clause Annotator</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --card: #ffffff;
+      --text: #1b2430;
+      --muted: #5a6577;
+      --border: #d8dee6;
+      --accent: #1d4ed8;
+      --accent-soft: #eff6ff;
+      --ok: #15803d;
+      --warn: #b45309;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 900px;
+      margin: 24px auto;
+      padding: 0 16px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+    .header-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    h1 {
+      margin: 0;
+      font-size: 1.25rem;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    .pill {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid #bfdbfe;
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+    .progress-bar-wrap {
+      width: 100%;
+      height: 8px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      margin-top: 12px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--ok);
+      transition: width 0.15s ease;
+    }
+    .clause-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .clause-text {
+      background: #fafbfc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      white-space: pre-wrap;
+      font-size: 1rem;
+      margin-bottom: 18px;
+      min-height: 96px;
+    }
+    .tags-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .tag-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      background: #fff;
+      user-select: none;
+    }
+    .tag-option.active {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+    .tag-option input {
+      margin-top: 3px;
+      transform: scale(1.15);
+      cursor: pointer;
+    }
+    .tag-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    .tag-desc {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    .kbd {
+      display: inline-block;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.75rem;
+      background: #eef1f5;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      padding: 0 5px;
+      margin-right: 4px;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    button {
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 7px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    button:hover:not(:disabled) {
+      background: #f1f5f9;
+    }
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    button.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    button.primary:hover:not(:disabled) {
+      background: #1e40af;
+    }
+    .status {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 10px;
+    }
+    .shortcuts-note {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="header-row">
+        <h1>LegalAssist — Clause Annotator</h1>
+        <div>
+          <input type="file" id="fileInput" accept=".json,application/json">
+        </div>
+      </div>
+      <div class="meta">
+        <span>Document: <strong id="docIdLabel">—</strong></span>
+        <span>Type: <span id="docTypeLabel" class="pill">—</span></span>
+        <span>Position: <strong id="posLabel">0 / 0</strong></span>
+        <span>Annotated: <strong id="annotatedLabel">0 / 0</strong></span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div id="progressBar" class="progress-bar-fill"></div>
+      </div>
+    </div>
+
+    <div class="card" id="workspaceCard" style="display: none;">
+      <div class="clause-header">
+        <span>Clause ID: <strong id="clauseIdLabel">—</strong></span>
+        <span>Number: <strong id="clauseNumLabel">—</strong></span>
+      </div>
+      <div id="clauseText" class="clause-text"></div>
+
+      <div class="tags-grid" id="tagsGrid"></div>
+
+      <div class="controls">
+        <div class="btn-group">
+          <button type="button" id="prevBtn">← Previous</button>
+          <button type="button" id="nextBtn">Next →</button>
+          <button type="button" id="jumpBtn">Jump to next unannotated</button>
+        </div>
+        <div class="btn-group">
+          <button type="button" id="saveBtn" class="primary">Download JSON (S)</button>
+        </div>
+      </div>
+      <div id="statusMsg" class="status"></div>
+    </div>
+
+    <div class="card shortcuts-note">
+      <strong>Keyboard shortcuts:</strong>
+      <span class="kbd">1</span> obligation &nbsp;
+      <span class="kbd">2</span> right &nbsp;
+      <span class="kbd">3</span> deadline &nbsp;
+      <span class="kbd">4</span> penalty &nbsp;|&nbsp;
+      <span class="kbd">←</span>/<span class="kbd">→</span> previous / next clause &nbsp;|&nbsp;
+      <span class="kbd">S</span> download updated JSON
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const TAG_DEFS = [
+        { key: "obligation", shortcut: "1", desc: "Party must / shall / agrees to do or not do something" },
+        { key: "right", shortcut: "2", desc: "Party may / is entitled to / is protected" },
+        { key: "deadline", shortcut: "3", desc: "Specific date, time limit, or notice period" },
+        { key: "penalty", shortcut: "4", desc: "Fine, forfeiture, fee, interest, or breach consequence" }
+      ];
+
+      let docData = null;
+      let currentFileName = "clauses.json";
+      let currentIdx = 0;
+
+      const fileInput = document.getElementById("fileInput");
+      const workspaceCard = document.getElementById("workspaceCard");
+      const docIdLabel = document.getElementById("docIdLabel");
+      const docTypeLabel = document.getElementById("docTypeLabel");
+      const posLabel = document.getElementById("posLabel");
+      const annotatedLabel = document.getElementById("annotatedLabel");
+      const progressBar = document.getElementById("progressBar");
+      const clauseIdLabel = document.getElementById("clauseIdLabel");
+      const clauseNumLabel = document.getElementById("clauseNumLabel");
+      const clauseText = document.getElementById("clauseText");
+      const tagsGrid = document.getElementById("tagsGrid");
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+      const jumpBtn = document.getElementById("jumpBtn");
+      const saveBtn = document.getElementById("saveBtn");
+      const statusMsg = document.getElementById("statusMsg");
+
+      function buildCheckboxes() {
+        tagsGrid.innerHTML = "";
+        TAG_DEFS.forEach((def) => {
+          const label = document.createElement("label");
+          label.className = "tag-option";
+          label.dataset.tag = def.key;
+
+          const cb = document.createElement("input");
+          cb.type = "checkbox";
+          cb.value = def.key;
+          cb.addEventListener("change", () => setTag(def.key, cb.checked));
+
+          const info = document.createElement("div");
+          const title = document.createElement("div");
+          title.className = "tag-title";
+          title.innerHTML = `<span class="kbd">${def.shortcut}</span>${def.key}`;
+
+          const desc = document.createElement("div");
+          desc.className = "tag-desc";
+          desc.textContent = def.desc;
+
+          info.appendChild(title);
+          info.appendChild(desc);
+          label.appendChild(cb);
+          label.appendChild(info);
+          tagsGrid.appendChild(label);
+        });
+      }
+
+      function setStatus(msg) {
+        statusMsg.textContent = msg;
+      }
+
+      function getCurrentClause() {
+        if (!docData || !Array.isArray(docData.clauses) || docData.clauses.length === 0) {
+          return null;
+        }
+        return docData.clauses[currentIdx];
+      }
+
+      function setTag(tagKey, enabled) {
+        const clause = getCurrentClause();
+        if (!clause) return;
+        const current = new Set(Array.isArray(clause.tags) ? clause.tags : []);
+        if (enabled) {
+          current.add(tagKey);
+        } else {
+          current.delete(tagKey);
+        }
+        // Keep canonical tag order.
+        clause.tags = TAG_DEFS.map((d) => d.key).filter((k) => current.has(k));
+        render();
+      }
+
+      function toggleTagByShortcut(index) {
+        const def = TAG_DEFS[index];
+        const clause = getCurrentClause();
+        if (!def || !clause) return;
+        const hasTag = Array.isArray(clause.tags) && clause.tags.includes(def.key);
+        setTag(def.key, !hasTag);
+      }
+
+      function render() {
+        if (!docData || !Array.isArray(docData.clauses)) {
+          workspaceCard.style.display = "none";
+          return;
+        }
+        const total = docData.clauses.length;
+        const annotatedCount = docData.clauses.filter(
+          (c) => Array.isArray(c.tags) && c.tags.length > 0
+        ).length;
+
+        docIdLabel.textContent = docData.doc_id || "—";
+        docTypeLabel.textContent = docData.doc_type || "unknown";
+        posLabel.textContent = total > 0 ? `${currentIdx + 1} / ${total}` : "0 / 0";
+        annotatedLabel.textContent = `${annotatedCount} / ${total}`;
+        progressBar.style.width = total > 0 ? `${Math.round((annotatedCount / total) * 100)}%` : "0%";
+
+        if (total === 0) {
+          workspaceCard.style.display = "block";
+          clauseIdLabel.textContent = "—";
+          clauseNumLabel.textContent = "—";
+          clauseText.textContent = "(No clauses in this file)";
+          prevBtn.disabled = true;
+          nextBtn.disabled = true;
+          jumpBtn.disabled = true;
+          return;
+        }
+
+        workspaceCard.style.display = "block";
+        const clause = docData.clauses[currentIdx];
+        const activeTags = new Set(Array.isArray(clause.tags) ? clause.tags : []);
+
+        clauseIdLabel.textContent = clause.id || "—";
+        clauseNumLabel.textContent = clause.number || "—";
+        clauseText.textContent = clause.text || "";
+
+        Array.from(tagsGrid.querySelectorAll(".tag-option")).forEach((el) => {
+          const tag = el.dataset.tag;
+          const cb = el.querySelector("input");
+          const checked = activeTags.has(tag);
+          cb.checked = checked;
+          el.classList.toggle("active", checked);
+        });
+
+        prevBtn.disabled = currentIdx === 0;
+        nextBtn.disabled = currentIdx >= total - 1;
+        jumpBtn.disabled = false;
+      }
+
+      function move(delta) {
+        if (!docData || !docData.clauses.length) return;
+        const nextIdx = currentIdx + delta;
+        if (nextIdx >= 0 && nextIdx < docData.clauses.length) {
+          currentIdx = nextIdx;
+          setStatus("");
+          render();
+        }
+      }
+
+      function jumpToNextUnannotated() {
+        if (!docData || !docData.clauses.length) return;
+        const total = docData.clauses.length;
+        for (let offset = 1; offset <= total; offset++) {
+          const idx = (currentIdx + offset) % total;
+          const tags = docData.clauses[idx].tags;
+          if (!Array.isArray(tags) || tags.length === 0) {
+            currentIdx = idx;
+            setStatus(`Jumped to unannotated clause ${docData.clauses[idx].id || idx + 1}.`);
+            render();
+            return;
+          }
+        }
+        setStatus("All clauses have at least one tag.");
+      }
+
+      function downloadJson() {
+        if (!docData) return;
+        const blob = new Blob([JSON.stringify(docData, null, 2) + "\n"], {
+          type: "application/json"
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = currentFileName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        setStatus(`Downloaded ${currentFileName}.`);
+      }
+
+      fileInput.addEventListener("change", (event) => {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+        currentFileName = file.name;
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const parsed = JSON.parse(String(reader.result));
+            if (!Array.isArray(parsed.clauses)) {
+              throw new Error("Missing 'clauses' array.");
+            }
+            docData = parsed;
+            currentIdx = 0;
+            setStatus(`Loaded ${file.name} (${parsed.clauses.length} clauses).`);
+            fileInput.blur();
+            render();
+          } catch (err) {
+            alert(`Invalid clauses JSON: ${err.message}`);
+          }
+        };
+        reader.readAsText(file, "utf-8");
+      });
+
+      prevBtn.addEventListener("click", () => move(-1));
+      nextBtn.addEventListener("click", () => move(1));
+      jumpBtn.addEventListener("click", jumpToNextUnannotated);
+      saveBtn.addEventListener("click", downloadJson);
+
+      document.addEventListener("keydown", (e) => {
+        if (!docData) return;
+        const tagName = e.target && e.target.tagName ? e.target.tagName.toUpperCase() : "";
+        if (tagName === "TEXTAREA" || (tagName === "INPUT" && e.target.type !== "checkbox" && e.target.type !== "file")) {
+          return;
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+          e.preventDefault();
+          downloadJson();
+          return;
+        }
+        if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+        if (e.key >= "1" && e.key <= "4") {
+          e.preventDefault();
+          toggleTagByShortcut(Number(e.key) - 1);
+        } else if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          move(-1);
+        } else if (e.key === "ArrowRight") {
+          e.preventDefault();
+          move(1);
+        } else if (e.key.toLowerCase() === "s") {
+          e.preventDefault();
+          downloadJson();
+        }
+      });
+
+      buildCheckboxes();
+    })();
+  </script>
+</body>
+</html>
