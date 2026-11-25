@@ -1,4 +1,4 @@
-﻿<# setup_env.ps1 — Recreate the NLP_Project conda environment from scratch. #>
+<# setup_env.ps1 — Recreate the NLP_Project conda environment from scratch. #>
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
