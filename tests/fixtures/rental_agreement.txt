@@ -1,0 +1,30 @@
+SYNTHETIC TEST FIXTURE - not part of the evaluation corpus
+
+RESIDENTIAL RENTAL AGREEMENT
+
+1. PARTIES AND PREMISES. This Residential Rental Agreement is entered into between the Landlord and the Tenant for the residential premises at Sector 14, Chandigarh.
+
+2. TERM AND LOCK-IN. The tenancy shall run for 11 months commencing on 1 January 2027.
+
+2.1 Lock-in Period: Neither the Landlord nor the Tenant may terminate during the initial 6-month lock-in period.
+
+2.2 Renewal Option: Upon expiry, the parties may renew the rental agreement in writing.
+
+3. RENT AND DEPOSIT. All payments are due on or before the 5th day of each calendar month.
+
+3.1 Monthly Rent: The Tenant shall pay a monthly rent of Rs. 22,000 via bank transfer.
+
+3.1.1 Maintenance Charges: Society maintenance charges of Rs. 2,000 per month shall be borne by the Tenant.
+
+3.2 Security Deposit and Late Fees: The Tenant has placed an interest-free security deposit of Rs. 44,000 subject to:
+(a) Late rent beyond the 10th day incurs a penalty of Rs. 500 per day.
+(b) Deductions from the security deposit are allowed only for:
+(i) Unpaid rent or pending utility bills at handover.
+(ii) Repair of structural damage beyond normal wear and tear.
+
+Clause 4: Subletting Restrictions. The Tenant shall not sublet, assign, or transfer possession of the premises without written consent.
+
+Section 5: Notice to Vacate. Either party must give 30 days' prior written notice after the lock-in period to vacate the premises.
+
+GOVERNING LAW AND EVICTION
+Breach of essential obligations may entitle the Landlord to initiate eviction proceedings under applicable state tenancy law.

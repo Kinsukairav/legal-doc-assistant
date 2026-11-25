@@ -1,0 +1,30 @@
+SYNTHETIC TEST FIXTURE - not part of the evaluation corpus
+
+CLOUDNOTE PLATFORM TERMS OF SERVICE
+
+1. ACCEPTANCE OF TERMS. By accessing or using the CloudNote service, you agree to be bound by these Terms of Service and our Privacy Policy.
+
+2. USER ACCOUNT. You must maintain accurate registration information and safeguard your user account credentials.
+
+2.1 Account Eligibility: You must be at least 18 years old to create an account.
+
+2.2 Account Security: You are solely responsible for all activity occurring under your account.
+
+3. LICENSE GRANT. CloudNote grants you a limited, non-exclusive, revocable license to access the software for personal or internal business use.
+
+3.1 Intellectual Property: All platform code, trademarks, and documentation remain our exclusive intellectual property.
+
+3.1.1 User Content License: You retain ownership of your user content, while granting us a license to host and process it.
+
+4. SUBSCRIPTION AND BILLING. Paid subscription plans renew automatically unless cancelled prior to the billing date:
+(a) Monthly subscription fees are non-refundable once the billing cycle begins.
+(b) Failure to pay renewal charges may result in account suspension after:
+(i) A 7-day grace period with email reminders.
+(ii) Read-only access restriction for an additional 14 days.
+
+Clause 5: Prohibited Conduct. You agree not to reverse engineer the service, scrape user data, or bypass security controls.
+
+Article 6: Third-Party Services. Integrations with third-party tools and cookies are governed by their respective terms.
+
+LIMITATION OF LIABILITY
+To the maximum extent permitted by law, CloudNote disclaims implied warranties and caps total liability at the subscription fees paid in the preceding twelve months.

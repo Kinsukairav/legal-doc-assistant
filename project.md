@@ -58,7 +58,7 @@ Languages: **English, Hindi, Punjabi**. Every output carries a disclaimer:
 ## 3 · PROGRESS CHECKLIST
 
 - [x] **Step 0** — Scaffold + conda env + repo
-- [ ] **Step 1** — Extraction / cleaning / segmentation / doc-type
+- [x] **Step 1** — Extraction / cleaning / segmentation / doc-type
 - [ ] **Step 2** — Corpus manifest + annotation tool
 - [ ] **Step 3** — Classical baselines (TF-IDF+LR, TextRank, BM25)
 - [ ] **Step 4** — BiLSTM + XLM-R tagging (grouped CV)
@@ -72,6 +72,31 @@ Languages: **English, Hindi, Punjabi**. Every output carries a disclaimer:
 ---
 
 ## 4 · LOG
+
+### 2026-11-25 — Step 1: Extraction, cleaning, segmentation, doc-type (M1 & M2)
+
+**What was built:**
+- `src/legalassist/ingestion/extract.py`: `extract_pages(data, filename)` supporting `.pdf` (`pdfplumber`), `.docx` (`python-docx`, preserving paragraphs and deduplicated table cell rows in document order), and `.txt` (`utf-8-sig` with `latin-1` fallback); raises `UnsupportedFileTypeError` or `EmptyDocumentError` (subclassing `ExtractionError`).
+- `src/legalassist/ingestion/clean.py`: `clean_pages(pages)` removing lines repeating on >50% of pages (when `len(pages) >= 2`), stripping standalone page numbers (`Page 3 of 10`, `- 3 -`, etc.), de-hyphenating line-break words, and normalizing unicode quotes/dashes and whitespace while preserving clause numbering.
+- `src/legalassist/segmentation/segment.py`: `Clause` dataclass, `segment_clauses(text)` detecting `1.`, `1.1`, `1.1.1`, `(a)`, `(i)`, `Clause/Section/Article N`, and ALL-CAPS headings with hierarchical parent numbers (e.g. `4.2(a)`), sentence-boundary splitting above 1200 chars, paragraph-splitting fallback, and `llm_segment_fallback(text)` stub (`NotImplementedError` for Step 5).
+- `src/legalassist/segmentation/doctype.py`: `DOC_TYPE_KEYWORDS` dict and `detect_doc_type(text)` returning `(doc_type, confidence)` over `rental_agreement`, `terms_of_service`, `government_notice`, `unknown`.
+- `scripts/analyze.py`: CLI (`python -m scripts.analyze <file>`) outputting doc type, confidence, clause count, and segmented clauses as JSON.
+- `tests/fixtures/`: three 15-clause synthetic fixtures (`rental_agreement.txt`, `terms_of_service.txt`, `government_notice.txt`) plus `tests/conftest.py`, `tests/test_ingestion.py`, and `tests/test_segmentation.py` (16 total tests passing).
+
+**How to run:**
+```powershell
+& "C:\ProgramData\miniconda3\condabin\conda.bat" run -n NLP_Project --no-capture-output pytest "tests" -v
+& "C:\ProgramData\miniconda3\condabin\conda.bat" run -n NLP_Project --no-capture-output python -m scripts.analyze "tests/fixtures/rental_agreement.txt"
+```
+
+**Known limitations:**
+- Scanned/image-only PDFs raise `EmptyDocumentError` (OCR is out of scope).
+- Unnumbered documents with implicit clause breaks use paragraph splitting until `llm_segment_fallback` is implemented in Step 5.
+- Doc-type detection is purely English keyword/phrase weighted; Hindi/Punjabi documents and ML classifiers are not added yet.
+- Soft PDF line wraps within a paragraph are kept as `\n` (except hyphenated breaks) so key-value lines and table rows stay separated; may be refined when processing real corpus PDFs in Step 2.
+
+**Next step:**
+- Step 2: Corpus manifest + annotation tool.
 
 ### 2026-11-25 — Step 0: Scaffold, conda env, repo
 
