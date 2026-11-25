@@ -1,0 +1,9 @@
+transformers
+datasets
+accelerate
+sentence-transformers
+faiss-cpu
+evaluate
+rouge-score
+bert-score
+google-genai
